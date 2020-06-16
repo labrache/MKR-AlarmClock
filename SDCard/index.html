@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title></title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
+  <link rel="stylesheet" href="bs.css">
+</head>
+<body>
+    <div class="container">
+		<div class="row">
+			<div class="col-12">
+				<nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between" style="margin-bottom: 30px;">
+				  <a class="navbar-brand" href="#">AlarmBox WebControl</a>
+					<ul class="navbar-nav">
+					  <li class="nav-item"><a class="btn btn-outline-secondary" href="#" onclick="refreshOnce();">Refresh</a></li>
+					</ul>
+				</nav>
+			</div>
+			<div class="col-8">
+				<div class="jumbotron">
+				  <h1 class="display-4" id="hour" data-hour="00" data-min="00" data-sec="00" data-day="0">Updating</h1>
+				  <p class="lead" id="weekday"></p>
+				</div>
+			</div>
+			<div class="col-4">
+				<table class="table">
+					<tr><td>Alarm Active</td><td id="alarmstate"></td></tr>
+					<tr><td>SSID</td><td id="ssid"></td></tr>
+					<tr><td>SD Presence</td><td id="sdcardpresence"></td></tr>
+					<tr><td>SD Loaded</td><td id="sdloaded"></td></tr>
+				</table>
+			</div>
+			<div class="col-12">
+				<nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between">
+				  <a class="navbar-brand" href="#">Alarms</a>
+					<ul class="navbar-nav">
+					  <li class="nav-item">
+						<a class="btn btn-outline-success" href="#" onclick="addAlarm();">Add alarm</a>
+					  </li>
+					</ul>
+					<ul class="navbar-nav">
+					  <li class="nav-item">
+						<a class="btn btn-outline-primary" href="#" onclick="validate();" id="saveBtn">Save</a>
+					  </li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+		<div id="mainalarms" class="row"></div>
+	</div>
+	<div class="modal fade" id="fileSelectModal" tabindex="-1" role="dialog" aria-labelledby="fileSelectModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="fileSelectModalLabel">File selection</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>
+		  <div class="modal-body">
+			<div class="list-group" id="selectFileList">
+			  <a href="#" class="list-group-item list-group-item-action"></a>
+			</div>
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	<script type="text/html" id="alarmtmpl">
+		<div class="col-6 mol-md-12 alarmcol" data-id="<%=id%>" style="margin-top: 30px;">
+			<div class="card">
+				<div class="card-header">
+					<div class="custom-control custom-checkbox">
+					  <input type="checkbox" class="custom-control-input" id="active-<%=id%>">
+					  <label class="custom-control-label" for="active-<%=id%>">Active</label>
+					</div>
+				</div>
+			  <div class="card-body">
+				<div class="row">
+					<div class="col-5">
+						<div class="form-group">
+							<input type="text" id="hour-<%=id%>" class="form-control form-control-lg" placeholder="XX:XX" value="<%=h%>" required>
+						</div>
+					</div>
+					<div class="col">
+
+					</div>
+				</div>
+				<h6 class="card-subtitle mb-2 text-muted">Week days</h6>
+				<div class="row">
+					<div class="col-11 offset-1">
+						<div class="row">
+							<div class="col-3 custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="day-1-<%=id%>"><label class="custom-control-label" for="day-1-<%=id%>">Mo</label>
+							</div>
+							<div class="col-3 custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="day-2-<%=id%>"><label class="custom-control-label" for="day-2-<%=id%>">Tu</label>
+							</div>
+							<div class="col-3 custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="day-3-<%=id%>"><label class="custom-control-label" for="day-3-<%=id%>">We</label>
+							</div>
+							<div class="col-3 custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="day-4-<%=id%>"><label class="custom-control-label" for="day-4-<%=id%>">Th</label>
+							</div>
+							<div class="col-3 custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="day-5-<%=id%>"><label class="custom-control-label" for="day-5-<%=id%>">Fr</label>
+							</div>
+							<div class="col-3 custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="day-6-<%=id%>"><label class="custom-control-label" for="day-6-<%=id%>">Sa</label>
+							</div>
+							<div class="col-3 custom-control custom-checkbox">
+								<input type="checkbox" class="custom-control-input" id="day-0-<%=id%>"><label class="custom-control-label" for="day-0-<%=id%>">Su</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<h6 class="card-subtitle mb-2 text-muted">Alarm Type</h6>
+				<div class="row">
+					<div class="col-10 offset-1 alarmtype" data-src="<%=a.src%>">
+						<div class="custom-control custom-radio custom-control-inline">
+							<input data-target="url" type="radio" id="webradio-<%=id%>" name="typeselect-<%=id%>" class="custom-control-input">
+							<label class="custom-control-label" for="webradio-<%=id%>">Webradio</label>
+						</div>
+						<div class="custom-control custom-radio custom-control-inline">
+							<input data-target="sd" type="radio" id="sdfile-<%=id%>" name="typeselect-<%=id%>" class="custom-control-input">
+							<label class="custom-control-label" for="sdfile-<%=id%>">SD Card MP3</label>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 typeselection">
+						<label for="stream-url-<%=id%>" class="url">URL</label>
+						<div class="input-group mb-2 url">
+						  <div class="input-group-prepend">
+							<span class="input-group-text">URL</span>
+						  </div>
+						  <input type="text" class="form-control" id="stream-url-<%=id%>" placeholder="http://..." value="<%=(a.src == "url" ? a.href : "")%>">
+						</div>
+						<label for="file-<%=id%>" class="sd">Fichier</label>
+						<div class="input-group mb-2 sd">
+						  <input type="text" id="file-<%=id%>" class="form-control" placeholder="Fichier" value="<%=(a.src == "sd" ? a.href : "")%>" disabled>
+						  <div class="input-group-append">
+							<button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#fileSelectModal" data-inputtarget="file-<%=id%>">Select...</button>
+						  </div>
+						</div>
+					</div>
+				</div>
+			  </div>
+			  <div class="card-footer text-muted">
+				<a href="#" class="card-link removeBtn">Remove</a>
+			  </div>
+			</div>
+		</div>
+	</script>
+    <script src="jq.js"></script>
+    <script src="bs.js"></script>
+    <script src="mt.js"></script>
+	<script src="alarm.js"></script>
+</body>
+</html>
